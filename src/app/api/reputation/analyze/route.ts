@@ -324,7 +324,7 @@ async function fetchGitHubData(octokit: Octokit) {
         // Get gists
         let totalGists = 0
         try {
-            const { data: gists } = await octokit.rest.gists.listForAuthenticatedUser({
+            const { data: gists } = await octokit.rest.gists.list({
                 per_page: 100
             })
             totalGists = gists.length
