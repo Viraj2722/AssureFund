@@ -1,3 +1,5 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
 import {
     Dialog,
@@ -124,7 +126,8 @@ export default function WalletConnect() {
 
     const handleWalletSelect = async (walletName: string) => {
         try {
-            select(walletName)
+            // Cast to any to satisfy Wallet adapter's branded WalletName type in typings
+            select(walletName as any)
             setIsModalOpen(false)
         } catch (error) {
             console.error("Failed to select wallet:", error)

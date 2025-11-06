@@ -61,31 +61,6 @@ export default function LandingPage() {
                             Connect your wallet to get started • Link GitHub to build reputation
                         </p>
                     </div>
-
-                    {/* Features */}
-                    <div className="grid md:grid-cols-3 gap-8 max-w-3xl mx-auto pt-8">
-                        <div className="space-y-2">
-                            <div className="text-3xl">🔒</div>
-                            <h3 className="font-semibold text-zinc-900">Secure</h3>
-                            <p className="text-sm text-zinc-600">
-                                Blockchain-powered security for your funds
-                            </p>
-                        </div>
-                        <div className="space-y-2">
-                            <div className="text-3xl">⭐</div>
-                            <h3 className="font-semibold text-zinc-900">Reputation-Based</h3>
-                            <p className="text-sm text-zinc-600">
-                                GitHub activity builds trust and credibility
-                            </p>
-                        </div>
-                        <div className="space-y-2">
-                            <div className="text-3xl">🚀</div>
-                            <h3 className="font-semibold text-zinc-900">Fast Funding</h3>
-                            <p className="text-sm text-zinc-600">
-                                Launch projects and get backed quickly
-                            </p>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

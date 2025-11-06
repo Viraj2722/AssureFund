@@ -6,9 +6,9 @@ import { Github, Star, GitFork, GitPullRequest, Users, RefreshCw, Sparkles, LogO
 import { useRouter } from 'next/navigation';
 
 export default function Homepage() {
-  const [profile, setProfile] = useState(null);
-  const [stats, setStats] = useState(null);
-  const [analysis, setAnalysis] = useState(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [stats, setStats] = useState<any>(null);
+  const [analysis, setAnalysis] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('home'); // 'home' or 'profile'
@@ -120,14 +120,14 @@ export default function Homepage() {
     }
   };
 
-  const getScoreColor = (score) => {
+  const getScoreColor = (score: number) => {
     if (score >= 80) return 'from-green-500 to-emerald-600';
     if (score >= 60) return 'from-blue-500 to-cyan-600';
     if (score >= 40) return 'from-yellow-500 to-orange-600';
     return 'from-red-500 to-pink-600';
   };
 
-  const getTrustLevelBadge = (level) => {
+  const getTrustLevelBadge = (level: string) => {
     const badges = {
       elite: { label: 'Elite', color: 'bg-gradient-to-r from-yellow-400 to-amber-500', icon: '👑' },
       trusted: { label: 'Trusted', color: 'bg-gradient-to-r from-purple-500 to-indigo-600', icon: '⭐' },
@@ -135,7 +135,7 @@ export default function Homepage() {
       contributor: { label: 'Contributor', color: 'bg-gradient-to-r from-blue-500 to-cyan-600', icon: '🔵' },
       novice: { label: 'Novice', color: 'bg-gradient-to-r from-gray-500 to-slate-600', icon: '🌱' }
     };
-    return badges[level] || badges.novice;
+  return (badges as any)[level] || badges.novice;
   };
 
   if (loading) {
@@ -170,7 +170,7 @@ export default function Homepage() {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <img src="/Brand-Light.png" alt="AssureFund" className="h-10 w-10" />
+              <img src="/Brand-Light.png" alt="AssureFund" className="h-10 w-20" />
               <span className="text-xl font-bold text-zinc-900">AssureFund</span>
             </div>
 
@@ -347,7 +347,7 @@ export default function Homepage() {
                       <div>
                         <h3 className="text-lg font-semibold text-zinc-900 mb-3">💪 Your Strengths</h3>
                         <div className="space-y-2">
-                          {analysis.strengths.map((strength, i) => (
+                          {analysis.strengths.map((strength: string, i: number) => (
                             <div key={i} className="flex items-start gap-2 text-sm">
                               <div className="w-1.5 h-1.5 rounded-full bg-green-500 mt-1.5"></div>
                               <span className="text-zinc-700">{strength}</span>
@@ -360,7 +360,7 @@ export default function Homepage() {
                         <div>
                           <h3 className="text-lg font-semibold text-zinc-900 mb-3">🎯 Areas to Improve</h3>
                           <div className="space-y-2">
-                            {analysis.improvements.map((improvement, i) => (
+                            {analysis.improvements.map((improvement: string, i: number) => (
                               <div key={i} className="flex items-start gap-2 text-sm">
                                 <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5"></div>
                                 <span className="text-zinc-700">{improvement}</span>
@@ -433,11 +433,11 @@ export default function Homepage() {
                   </div>
                 </div>
 
-                {stats.languages && stats.languages.length > 0 && (
+                      {stats.languages && stats.languages.length > 0 && (
                   <div className="mt-6 pt-6 border-t">
                     <h3 className="text-lg font-semibold text-zinc-900 mb-3">Languages & Technologies</h3>
                     <div className="flex flex-wrap gap-2">
-                      {stats.languages.map((lang) => (
+                      {stats.languages.map((lang: string) => (
                         <span
                           key={lang}
                           className="px-3 py-1 bg-zinc-100 text-zinc-700 rounded-full text-sm font-medium"
@@ -489,7 +489,7 @@ export default function Homepage() {
   );
 }
 
-function StatCard({ icon, label, value, color }) {
+function StatCard({ icon, label, value, color }: { icon: any; label: string; value: any; color: string }) {
   const colorClasses = {
     blue: 'from-blue-500 to-cyan-600',
     yellow: 'from-yellow-400 to-amber-500',
@@ -499,7 +499,7 @@ function StatCard({ icon, label, value, color }) {
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6 space-y-3">
-      <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${colorClasses[color]} flex items-center justify-center text-white`}>
+    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${(colorClasses as any)[color]} flex items-center justify-center text-white`}>
         {icon}
       </div>
       <div>

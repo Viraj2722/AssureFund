@@ -1,0 +1,5 @@
+{
+  "watch": ["."],
+  "ext": "js,jsx,ts,tsx,json",
+  "exec": "next dev --turbopack"
+}
