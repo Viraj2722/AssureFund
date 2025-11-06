@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
         const statsData = {
             profile_id: profile.id,
             total_repos: githubData.stats.total_repos,
-            total_stars: githubData.stats.total_stars,
+            total_stars: githubData.stats.total_stars, // Stars received
             total_forks: githubData.stats.total_forks,
             total_commits: githubData.stats.total_commits,
             total_prs: githubData.stats.total_prs,
@@ -163,10 +163,22 @@ async function fetchGitHubData(octokit: Octokit) {
         const repos = allReposResponse.data
         console.log(`Fetched ${repos.length} public repositories`)
 
-        // Calculate repository stats
-        const totalStars = repos.reduce((sum, repo) => sum + (repo.stargazers_count || 0), 0)
+        // Calculate repository stats (stars RECEIVED by user's repos)
+        const totalStarsReceived = repos.reduce((sum, repo) => sum + (repo.stargazers_count || 0), 0)
         const totalForks = repos.reduce((sum, repo) => sum + (repo.forks_count || 0), 0)
         const totalWatchers = repos.reduce((sum, repo) => sum + (repo.watchers_count || 0), 0)
+        
+        // Get starred repositories (repos user has STARRED)
+        let totalStarsGiven = 0
+        try {
+            const { data: starredRepos } = await octokit.activity.listReposStarredByAuthenticatedUser({
+                per_page: 100
+            })
+            totalStarsGiven = starredRepos.length
+            console.log(`User has starred ${totalStarsGiven} repositories`)
+        } catch (error) {
+            console.log('Could not fetch starred repos')
+        }
 
         // Get languages from all repos
         const languages = new Set<string>()
@@ -312,8 +324,7 @@ async function fetchGitHubData(octokit: Octokit) {
         // Get gists
         let totalGists = 0
         try {
-            // Some Octokit versions expose gists differently in typings; use a runtime-cast to avoid type issues
-            const { data: gists } = await (octokit as any).gists.listForAuthenticatedUser({
+            const { data: gists } = await octokit.rest.gists.listForAuthenticatedUser({
                 per_page: 100
             })
             totalGists = gists.length
@@ -326,7 +337,7 @@ async function fetchGitHubData(octokit: Octokit) {
         const originalRepos = repos.length - forkedRepos
         
         const activeRepos = repos.filter(r => {
-            const lastUpdate = new Date(String(r.updated_at))
+            const lastUpdate = new Date(r.updated_at)
             const sixMonthsAgo = new Date()
             sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
             return lastUpdate > sixMonthsAgo
@@ -353,13 +364,14 @@ async function fetchGitHubData(octokit: Octokit) {
         // Build comprehensive stats object
         const stats = {
             // Core metrics - matching GitHub UI
-            total_repos: repos.length, // Public repos only
+            total_repos: repos.length,
             original_repos: originalRepos,
             forked_repos: forkedRepos,
             active_repos: activeRepos,
             
             // Popularity metrics
-            total_stars: totalStars,
+            total_stars: totalStarsReceived, // Stars received by user's repos
+            total_stars_given: totalStarsGiven, // Repos user has starred (the "Stars: 9" in GitHub UI)
             total_forks: totalForks,
             total_watchers: totalWatchers,
             
@@ -386,7 +398,7 @@ async function fetchGitHubData(octokit: Octokit) {
             total_languages: languages.size,
             
             // Calculated metrics
-            stars_per_repo: repos.length > 0 ? parseFloat((totalStars / repos.length).toFixed(2)) : 0,
+            stars_per_repo: repos.length > 0 ? parseFloat((totalStarsReceived / repos.length).toFixed(2)) : 0,
             pr_merge_rate: totalPRs > 0 ? parseFloat(((mergedPRs / totalPRs) * 100).toFixed(1)) : 0
         }
 
@@ -465,15 +477,33 @@ async function calculateReputation(githubData: any) {
             console.log('Running Gemini AI analysis...')
             const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
             
-            // Try gemini-pro first (most stable)
-            let model
-            try {
-                model = genAI.getGenerativeModel({ model: 'gemini-pro' })
-                console.log('Using model: gemini-pro')
-            } catch (e) {
-                console.log('Gemini Pro not available, skipping AI analysis')
+            // Try available models in order of preference
+            const modelNames = [
+                'gemini-2.0-flash-exp',  // Latest experimental
+                'gemini-1.5-flash',       // Stable fallback
+                'gemini-1.5-pro',         // Pro version
+            ]
+            
+            let model = null
+            let workingModelName = ''
+            
+            for (const modelName of modelNames) {
+                try {
+                    model = genAI.getGenerativeModel({ model: modelName })
+                    // Try a test generation to verify it works
+                    console.log(`Trying model: ${modelName}`)
+                    workingModelName = modelName
+                    break
+                } catch (e) {
+                    console.log(`Model ${modelName} not available, trying next...`)
+                }
+            }
+            
+            if (!model) {
                 throw new Error('No Gemini model available')
             }
+            
+            console.log(`Using model: ${workingModelName}`)
 
             const prompt = `You are an expert developer reputation analyst. Analyze this GitHub profile and provide a comprehensive assessment.
 
@@ -530,8 +560,11 @@ Return ONLY valid JSON:
             }
         } catch (error: any) {
             console.error('AI analysis error:', error.message)
-            console.log('Falling back to base score only')
+            console.log('Continuing without AI enhancement - base score will be used')
+            // AI analysis is optional, continue with base score
         }
+    } else {
+        console.log('Gemini API key not configured - using base score only')
     }
 
     // Final score calculation

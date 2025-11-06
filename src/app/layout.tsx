@@ -1,8 +1,19 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { SolanaProvider } from "@/context/solanaProvider";
+import { Gruppo, Michroma } from "next/font/google";
 
+const gruppo = Gruppo({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-gruppo",
+});
 
+const michroma = Michroma({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-michroma",
+});
 
 export const metadata: Metadata = {
   title: "AssureFund",
@@ -16,12 +27,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`antialiased`}
-      >
-        <SolanaProvider>
-          {children}
-        </SolanaProvider>
+      <body className={`${gruppo.className} antialiased`}>
+        <SolanaProvider>{children}</SolanaProvider>
       </body>
     </html>
   );
