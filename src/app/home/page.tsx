@@ -419,7 +419,7 @@ export default function Homepage() {
                 <div className="grid md:grid-cols-3 gap-6">
                   <div>
                     <div className="text-3xl font-bold text-zinc-900">{stats.total_commits}</div>
-                    <div className="text-sm text-zinc-500">Commits (Last Year)</div>
+                    <div className="text-sm text-zinc-500">Commits</div>
                   </div>
                   <div>
                     <div className="text-3xl font-bold text-zinc-900">{stats.total_issues}</div>
